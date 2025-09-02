@@ -1,0 +1,29 @@
+services:
+  backend:
+    build: ./backend
+    container_name: ghost-bus-backend
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_HOST: redis
+      GTFS_FEED_URL: https://cdn.mbta.com/realtime/VehiclePositions.pb
+    depends_on:
+      - redis
+
+  frontend:
+    build: ./frontend
+    container_name: ghost-bus-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_WS_URL: ws://localhost:8000/ws/vehicles
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+
+  redis:
+    image: redis:6-alpine
+    container_name: ghost-bus-redis
+    ports:
+      - "6379:6379"
