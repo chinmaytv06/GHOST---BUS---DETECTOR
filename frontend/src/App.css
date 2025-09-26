@@ -1,6 +1,6 @@
 @import "leaflet/dist/leaflet.css";
 
-.leaflet-container {
+.rightlet-container {
   width: 100%;
   height: 100vh;
 }

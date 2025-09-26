@@ -1,4 +1,32 @@
 services:
+  redis:
+    image: redis:6-alpine
+    container_name: ghost-bus-redis
+    ports:
+      - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: ghost-bus-postgres
+    environment:
+      POSTGRES_DB: ghostbus
+      POSTGRES_USER: ghostbus
+      POSTGRES_PASSWORD: ghostbus123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
   backend:
     build: ./backend
     container_name: ghost-bus-backend
@@ -6,9 +34,26 @@ services:
       - "8000:8000"
     environment:
       REDIS_HOST: redis
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ghostbus
+      POSTGRES_USER: ghostbus
+      POSTGRES_PASSWORD: ghostbus123
       GTFS_FEED_URL: https://cdn.mbta.com/realtime/VehiclePositions.pb
+      STALE_THRESHOLD: 300
+      STATIONARY_THRESHOLD: 600
+      OFF_ROUTE_THRESHOLD: 0.5
+      HISTORY_TTL: 86400
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
     depends_on:
       - redis
+      - postgres
 
   frontend:
     build: ./frontend
@@ -22,8 +67,5 @@ services:
     depends_on:
       - backend
 
-  redis:
-    image: redis:6-alpine
-    container_name: ghost-bus-redis
-    ports:
-      - "6379:6379"
+volumes:
+  postgres_data:

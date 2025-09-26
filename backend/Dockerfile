@@ -10,7 +10,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Now copy the rest of the code
 COPY . .
 
+# Make start.sh executable
+RUN chmod +x start.sh
+
 EXPOSE 8000
 
-# Because main.py is inside backend/app
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use start.sh to run both uvicorn and ingester
+CMD ["bash", "start.sh"]
